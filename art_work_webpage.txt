@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Artify – Online Drawing Gallery</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background: #333;
+      padding: 1em;
+      text-align: center;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      margin: 0 1em;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    main {
+      padding: 2em;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    .gallery-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      justify-content: center;
+    }
+
+    .art-card {
+      border: 1px solid #ccc;
+      padding: 1em;
+      width: 200px;
+      transition: transform 0.3s ease;
+    }
+
+    .art-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .art-card img {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('gallery')">Gallery</button>
+    <button onclick="showSection('about')">About</button>
+  </nav>
+
+  <main>
+    <!-- Home Section -->
+    <section id="home">
+      <h1>Upload Your Artwork</h1>
+      <form id="artForm">
+        <input type="text" id="artName" placeholder="Artwork Name" required />
+        <input type="text" id="artCategory" placeholder="Category" required />
+        <textarea id="artDescription" placeholder="Description" required></textarea>
+        <input type="file" id="artImage" accept="image/*" required />
+        <button type="submit">Add Artwork</button>
+      </form>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="hidden">
+      <h1>Gallery</h1>
+      <div id="galleryContainer" class="gallery-container"></div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="hidden">
+      <h1>About Artify</h1>
+      <p>Artify is a platform for artists to showcase their creativity. Upload your artwork and share your passion with the world!</p>
+    </section>
+  </main>
+
+  <script>
+    const artworks = JSON.parse(localStorage.getItem("artworks")) || [];
+
+    function showSection(id) {
+      document.querySelectorAll("section").forEach(sec => sec.classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+      if (id === "gallery") renderGallery();
+    }
+
+    function renderGallery() {
+      const container = document.getElementById("galleryContainer");
+      container.innerHTML = "";
+      artworks.forEach(art => {
+        const card = document.createElement("div");
+        card.className = "art-card";
+        card.innerHTML = `
+          <img src="${art.image}" alt="${art.name}" />
+          <h3>${art.name}</h3>
+          <p><strong>Category:</strong> ${art.category}</p>
+          <p>${art.description}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById("artForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const name = document.getElementById("artName").value;
+      const category = document.getElementById("artCategory").value;
+      const description = document.getElementById("artDescription").value;
+      const imageFile = document.getElementById("artImage").files[0];
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const newArt = {
+          name,
+          category,
+          description,
+          image: reader.result,
+        };
+        artworks.push(newArt);
+        localStorage.setItem("artworks", JSON.stringify(artworks));
+        alert("Artwork added!");
+        document.getElementById("artForm").reset();
+      };
+      reader.readAsDataURL(imageFile);
+    });
+
+    // Show Home by default
+    showSection('home');
+  </script>
+</body>
+</html>
